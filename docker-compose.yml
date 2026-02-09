@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: seogrothlab-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    container_name: seogrothlab-redis
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: seogrothlab-backend
+    env_file: .env
+    environment:
+      # যদি আপনার পাইথন কোডে os.getenv("DATABASE_URL") থাকে তবে এটি ঠিক আছে।
+      # আর যদি os.getenv("DATABASE_URL_BACKEND") থাকে, তবে বাম পাশের নামটিও পাল্টাতে হবে।
+      - DATABASE_URL=${DATABASE_URL_BACKEND}
+      - DATABASE_URL_PRISMA=${DATABASE_URL_PRISMA}
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "8000:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+  next_app:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: seogrothlab-next
+    env_file: .env
+    environment:
+      # [FIX] এখানে বাম পাশের নামটি অবশ্যই স্কিমার env("...") নামের সাথে মিলতে হবে
+      - DATABASE_URL_PRISMA=${DATABASE_URL_PRISMA}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    depends_on:
+      - db
+      - backend
+    ports:
+      - "3000:3000"
+      - "5555:5555"
+    # কমান্ড ঠিক আছে
+    command: sh -c "npx prisma generate && npx prisma db push && npm run dev"
+
+volumes:
+  postgres_data:

@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String?
+  email     String    @unique
+  password  String // Login এর জন্য পাসওয়ার্ড লাগবে
+  posts     Post[] // এক ইউজারের অনেক পোস্ট থাকতে পারে
+  websites  Website[]
+  createdAt DateTime  @default(now())
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  updatedAt DateTime @updatedAt // Edit করার সময় আপডেট হবে
+  createdAt DateTime @default(now())
+}
+
+model Website {
+  id        Int      @id @default(autoincrement())
+  url       String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  audits    Audit[]
+  createdAt DateTime @default(now())
+}
+
+model Audit {
+  id         Int      @id @default(autoincrement())
+  websiteId  Int
+  website    Website  @relation(fields: [websiteId], references: [id])
+  score      Int // এসইও স্কোর (০-১০০)
+  reportData Json // অডিট রিপোর্ট (Rust থেকে আসা ডিটেইল ডেটা)
+  status     String // 'pending', 'completed', 'failed'
+  createdAt  DateTime @default(now())
+}

@@ -1,0 +1,25 @@
+# --- Core Framework ---
+fastapi>=0.112.0
+uvicorn[standard]>=0.30.0
+
+# --- AI & Context Protocol ---
+mcp>=1.2.0
+
+# --- Database & ORM ---
+sqlalchemy
+psycopg[binary]
+prisma
+python-dotenv
+pydantic>=2.0.0
+
+# --- Auth & Security ---
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
+
+# --- Utilities ---
+requests
+httpx
+email-validator
+passlib[bcrypt]
+bcrypt==4.0.1

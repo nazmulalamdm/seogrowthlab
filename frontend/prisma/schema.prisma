@@ -1,0 +1,65 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+
+  
+  
+}
+
+// TablePlus অনুযায়ী 'User' মডেল
+// User Model
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String?
+  email     String    @unique
+  password  String
+  posts     Post[]
+  websites  Website[]
+  createdAt DateTime  @default(now())
+}
+
+// Post Model
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+// Website Model (Fixed)
+model Website {
+  id        Int      @id @default(autoincrement())
+  url       String
+  userId    Int      // Foreign Key কলাম
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  audits    Audit[]
+  createdAt DateTime @default(now())
+}
+
+// Audit Model
+model Audit {
+  id               String   @id @default(uuid())
+  url              String
+  title            String?
+  metaDescription  String?
+  h1Count          Int      @default(0)
+  imageCount       Int      @default(0)
+  imagesWithoutAlt Int      @default(0)
+  loadTime         Float?   
+  seoScore         Int      @default(0)
+  reportData       Json?    
+  status           String   @default("pending")
+  createdAt        DateTime @default(now())
+  websiteId        Int      // Foreign Key কলাম
+  website          Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+}

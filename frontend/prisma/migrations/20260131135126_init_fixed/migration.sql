@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Audit" ALTER COLUMN "score" DROP NOT NULL,
+ALTER COLUMN "reportData" DROP NOT NULL,
+ALTER COLUMN "status" SET DEFAULT 'pending';
