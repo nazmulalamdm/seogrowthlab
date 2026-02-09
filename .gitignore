@@ -47,3 +47,5 @@ prisma/migrations/*_test/
 .DS_Store
 *.pem
 Thumbs.db
+# Rust Build Files
+target/
